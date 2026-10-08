@@ -1,0 +1,10 @@
+# Built binary at the repo root only — a bare pattern would also match the
+# cmd/k8s-daemonset-coverage/ source directory and silently drop main.go.
+/k8s-daemonset-coverage
+/dist/
+/coverage.out
+/*.exe
+
+# Fixtures and examples are part of the test suite and always tracked.
+!examples/**
+!testdata/**

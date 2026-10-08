@@ -1,0 +1,73 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        go: ['1.22.x', '1.23.x', 'stable']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+          cache: true
+
+      - name: gofmt
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "gofmt needed on:"; echo "$unformatted"; exit 1
+          fi
+
+      - name: vet
+        run: go vet ./...
+
+      - name: build
+        run: go build ./...
+
+      - name: test
+        run: go test -race ./...
+
+  example:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+
+      - name: build binary
+        run: go build -o k8s-daemonset-coverage ./cmd/k8s-daemonset-coverage
+
+      - name: report the example cluster
+        run: ./k8s-daemonset-coverage --snapshot examples/cluster-snapshot.json
+
+      - name: fail-under must flag the gap
+        run: |
+          set +e
+          ./k8s-daemonset-coverage --snapshot examples/cluster-snapshot.json --fail-under 100
+          code=$?
+          set -e
+          if [ "$code" -ne 1 ]; then
+            echo "expected exit 1 from --fail-under 100, got $code"; exit 1
+          fi
+
+      - name: json output is parseable
+        run: |
+          ./k8s-daemonset-coverage --snapshot examples/cluster-snapshot.json --format json \
+            | jq -e '.daemonsets | length == 2'
