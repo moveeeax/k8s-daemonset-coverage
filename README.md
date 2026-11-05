@@ -1,7 +1,7 @@
 # k8s-daemonset-coverage
 
 [![ci](https://github.com/moveeeax/k8s-daemonset-coverage/actions/workflows/ci.yml/badge.svg)](https://github.com/moveeeax/k8s-daemonset-coverage/actions/workflows/ci.yml)
-[![go](https://img.shields.io/badge/go-1.22%2B-00ADD8)](https://go.dev/)
+[![go](https://img.shields.io/badge/go-1.26%2B-00ADD8)](https://go.dev/)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 Find the nodes a DaemonSet is silently **not** running on, and the exact reason for each one.
@@ -25,6 +25,8 @@ logging/fluent-bit — 4 uncovered node(s):
 ```
 
 ## Install
+
+Requires Go 1.26 or newer.
 
 ```sh
 go install github.com/moveeeax/k8s-daemonset-coverage/cmd/k8s-daemonset-coverage@latest
